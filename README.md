@@ -124,6 +124,39 @@ dbt-clickhouse==1.8.7
 
 ## Для 10 баллов: конфиг sqlfluff и pre-commit
 
-- `.sqlfluff` с диалектом clickhouse и templater dbt.
-- `.pre-commit-config.yaml` с хуками `sqlfluff-lint` и `sqlfluff-fix`.
-- `Makefile` с целями `deps`, `seed`, `run`, `test`, `docs`, `lint`, `format`, `all`.
+.sqlfluff
+```
+[sqlfluff]
+dialect = clickhouse
+templater = dbt
+max_line_length = 120
+exclude_rules = L031,ST06,CP03
+
+[sqlfluff:templater:dbt]
+project_dir = dbt
+profiles_dir = dbt
+
+[sqlfluff:rules:capitalisation.functions]
+capitalisation_policy = lower
+```
+
+.pre-commit-config.yaml
+```
+repos:
+  - repo: https://github.com/sqlfluff/sqlfluff
+    rev: 3.1.1
+    hooks:
+      - id: sqlfluff-lint
+        args: [--dialect, clickhouse, --config, .sqlfluff]
+        additional_dependencies:
+          - sqlfluff-templater-dbt==3.1.1
+          - dbt-core==1.8.7
+          - dbt-clickhouse==1.8.7
+      - id: sqlfluff-fix
+        args: [--dialect, clickhouse, --config, .sqlfluff]
+        additional_dependencies:
+          - sqlfluff-templater-dbt==3.1.1
+          - dbt-core==1.8.7
+          - dbt-clickhouse==1.8.7
+
+```
