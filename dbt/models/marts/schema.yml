@@ -1,0 +1,141 @@
+version: 2
+
+models:
+  - name: mart_daily_state_metrics
+    description: Daily transaction performance and spend metrics by US state.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [transaction_date, us_state]
+    columns:
+      - name: transaction_date
+        description: Date of transactions.
+        tests:
+          - not_null
+      - name: us_state
+        description: Two letter state code.
+        tests:
+          - not_null
+      - name: transaction_count
+        description: Number of transactions for the state and date.
+      - name: total_amount
+        description: Total spend for the state and date.
+      - name: avg_amount
+        description: Average spend per transaction.
+      - name: p95_amount
+        description: 95th percentile spend per transaction.
+      - name: large_txn_share
+        description: Share of transactions above the configured threshold.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 1
+
+  - name: mart_fraud_by_category
+    description: Fraud lens by transaction category.
+    tests:
+      - unique:
+          column_name: cat_id
+    columns:
+      - name: cat_id
+        description: Category id.
+        tests:
+          - not_null
+      - name: transaction_count
+        description: Number of transactions in the category.
+      - name: fraud_count
+        description: Number of fraudulent transactions in the category.
+      - name: fraud_rate
+        description: Fraud rate within the category.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 1
+
+  - name: mart_fraud_by_state
+    description: Geographic fraud performance by state.
+    tests:
+      - unique:
+          column_name: us_state
+    columns:
+      - name: us_state
+        description: Two letter state code.
+        tests:
+          - not_null
+      - name: transaction_count
+        description: Total transactions for the state.
+      - name: unique_customers
+        description: Distinct customers per state.
+      - name: unique_merchants
+        description: Distinct merchants per state.
+      - name: fraud_rate
+        description: Fraud rate within the state.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 1
+
+  - name: mart_customer_risk_profile
+    description: Customer level fraud risk segmentation.
+    tests:
+      - unique:
+          column_name: customer_id
+    columns:
+      - name: customer_id
+        description: Surrogate customer identifier.
+        tests:
+          - not_null
+      - name: transaction_count
+        description: Total number of transactions for the customer.
+      - name: fraud_rate
+        description: Share of fraudulent transactions for the customer.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 1
+      - name: risk_level
+        description: Risk tier classification based on fraud rate.
+        tests:
+          - accepted_values:
+              values: ["HIGH", "MEDIUM", "LOW"]
+
+  - name: mart_hourly_fraud_pattern
+    description: Hour and weekday level fraud patterns.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [day_of_week, hour_of_day]
+    columns:
+      - name: day_of_week
+        description: Day of week number (0=Sunday).
+      - name: day_name
+        description: Day of week name derived from the transaction date.
+      - name: hour_of_day
+        description: Hour of day in 24h format.
+      - name: fraud_rate
+        description: Fraud rate for the hour/day bucket.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 1
+
+  - name: mart_merchant_analytics
+    description: Merchant level performance and fraud summary.
+    tests:
+      - unique:
+          column_name: merchant
+    columns:
+      - name: merchant
+        description: Merchant name.
+        tests:
+          - not_null
+      - name: transaction_count
+        description: Total number of transactions for the merchant.
+      - name: unique_customers
+        description: Distinct customers per merchant.
+      - name: fraud_rate
+        description: Fraud rate for the merchant.
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 1
+      - name: suspicious_merchant
+        description: Flagged when fraud rate exceeds the configured threshold.

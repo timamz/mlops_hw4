@@ -1,0 +1,59 @@
+version: 2
+
+models:
+  - name: stg_transactions
+    description: Cleaned and typed view of raw transactions enriched with surrogate identifiers.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [transaction_id]
+    columns:
+      - name: transaction_id
+        description: Deterministic surrogate key per transaction.
+        tests:
+          - not_null
+          - unique
+      - name: customer_id
+        description: Surrogate identifier for a customer.
+        tests:
+          - not_null
+      - name: transaction_time
+        description: Timestamp of the transaction.
+        tests:
+          - not_null
+      - name: transaction_date
+        description: Calendar date of the transaction.
+        tests:
+          - not_null
+      - name: merchant
+        description: Merchant name.
+        tests:
+          - not_null
+      - name: cat_id
+        description: Category identifier.
+        tests:
+          - not_null
+      - name: amount
+        description: Transaction amount cast to numeric.
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+      - name: gender
+        description: Customer gender flag.
+        tests:
+          - accepted_values:
+              values: ["M", "F"]
+      - name: us_state
+        description: Two letter US state code.
+        tests:
+          - not_null
+      - name: is_fraud
+        description: Fraud indicator.
+        tests:
+          - accepted_values:
+              values: [0, 1]
+      - name: amount_bucket
+        description: Segmented bucket based on transaction amount.
+        tests:
+          - accepted_values:
+              values: ["small", "medium", "large", "very_large"]

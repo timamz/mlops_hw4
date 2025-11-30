@@ -1,0 +1,42 @@
+version: 2
+
+sources:
+  - name: raw_transactions
+    description: Raw transactional feed ingested from the provided CSV export of ClickHouse.
+    schema: "{{ target.schema }}_raw"
+    tables:
+      - name: transactions
+        description: Seeded table representing the original transactions extract.
+        columns:
+          - name: transaction_time
+            description: Timestamp of the transaction event.
+            tests:
+              - not_null
+          - name: merch
+            description: Merchant name.
+            tests:
+              - not_null
+          - name: cat_id
+            description: Category identifier of the transaction.
+            tests:
+              - not_null
+          - name: amount
+            description: Transaction amount in USD.
+            tests:
+              - not_null
+              - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: 0
+          - name: gender
+            description: Customer gender flag.
+            tests:
+              - accepted_values:
+                  values: ["M", "F"]
+          - name: us_state
+            description: Two letter US state abbreviation.
+            tests:
+              - not_null
+          - name: target
+            description: Fraud label (0/1).
+            tests:
+              - accepted_values:
+                  values: [0, 1]

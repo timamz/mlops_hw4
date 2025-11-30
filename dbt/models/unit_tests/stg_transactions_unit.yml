@@ -1,0 +1,55 @@
+version: 2
+
+unit_tests:
+  - name: stg_transactions_bucketing
+    description: Ensure staging applies amount bucketing and fraud flag mapping correctly.
+    model: stg_transactions
+    given:
+      - input: source("raw_transactions", "transactions")
+        rows:
+          - transaction_time: "2019-01-01 00:00:00"
+            merch: "m1"
+            cat_id: "cat"
+            amount: 10
+            name_1: "John"
+            name_2: "Doe"
+            gender: "M"
+            street: "Main"
+            one_city: "City"
+            us_state: "CA"
+            post_code: "12345"
+            lat: 0
+            lon: 0
+            population_city: 10
+            jobs: "job"
+            merchant_lat: 0
+            merchant_lon: 0
+            target: 0
+          - transaction_time: "2019-01-02 10:00:00"
+            merch: "m2"
+            cat_id: "cat"
+            amount: 250
+            name_1: "Jane"
+            name_2: "Doe"
+            gender: "F"
+            street: "Second"
+            one_city: "Town"
+            us_state: "NY"
+            post_code: "54321"
+            lat: 0
+            lon: 0
+            population_city: 20
+            jobs: "job"
+            merchant_lat: 0
+            merchant_lon: 0
+            target: 1
+    expect:
+      rows:
+        - merchant: "m1"
+          amount_bucket: "small"
+          is_fraud: 0
+          us_state: "CA"
+        - merchant: "m2"
+          amount_bucket: "large"
+          is_fraud: 1
+          us_state: "NY"
