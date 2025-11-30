@@ -4,3 +4,5 @@ __pycache__/
 dbt/target/
 dbt/dbt_packages/
 *.duckdb
+dbt/seeds/transactions.csv
+dbt/logs/
