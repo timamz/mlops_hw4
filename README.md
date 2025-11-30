@@ -5,19 +5,6 @@ dbt-clickhouse==1.8.7
 
 ## Скриншот/лог успешного `dbt test`
 
-`dbt test --project-dir dbt --profiles-dir dbt` завершился успешно:
-- PASS=44, WARN=0, ERROR=0, SKIP=0.
-- Адаптер: clickhouse 1.8.7.
-
-## Скриншот DAG из dbt Docs
-
-## Версии `dbt-core` и `dbt-clickhouse`
-
-dbt-core==1.8.7
-dbt-clickhouse==1.8.7
-
-## Скриншот/лог успешного `dbt test`
-
 ```
 [0m19:35:38  Running with dbt=1.8.7
 [0m19:35:38  Registered adapter: clickhouse=1.8.7
@@ -120,6 +107,10 @@ dbt-clickhouse==1.8.7
 [0m19:35:39  
 [0m19:35:39  Done. PASS=44 WARN=0 ERROR=0 SKIP=0 TOTAL=44
 ```
+
+## Скриншот DAG из dbt Docs
+
+![](dag_screenshot.jpg)
 
 ## Список реализованных витрин и тестов
 
